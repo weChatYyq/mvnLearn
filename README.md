@@ -28,7 +28,7 @@ Maven不仅是构建工具，还是一个***依赖管理工具和项目管理工
 5. mvn clean install：运行清理和安装，会将打好的包安装到本地仓库中，以便其他的项目可以调用。
 6. mvn clean deploy：运行清理和发布（发布到私服上面）。
 上面的命令大部分都是连写的，大家也可以拆分分别执行，这是活的，看个人喜好以及使用需求，Eclipse Run as对maven项目会提供常用的命令。
-
+执行maven命令必须进入到pom.xml的目录中进行执行
 五.设置http代理
 ------
 ```cmd
@@ -220,3 +220,220 @@ Maven不仅是构建工具，还是一个***依赖管理工具和项目管理工
 十八、书籍推荐
 ---
 <<Maven实战>>
+
+十九、为什么使用Maven这样的构建工具【why】
+----
+- 一个项目就是一个工程
+如果项目非常庞大，就不适合使用package来划分模块，最好是每一个模块对应一个工程，利于分工协作。借助于maven就可以将一个项目拆分成多个工程
+- 项目中使用jar包，需要“复制”、“粘贴”项目的lib中
+同样的jar包重复的出现在不同的项目工程中，你需要做不停的复制粘贴的重复工作。借助于maven，可以将jar包保存在“仓库”中，不管在哪个项目只要使用引用即可就行。
+- jar包需要的时候每次都要自己准备好或到官网下载
+借助于maven我们可以使用统一的规范方式下载jar包，规范
+- jar包版本不一致的风险
+不同的项目在使用jar包的时候，有可能会导致各个项目的jar包版本不一致，导致未执行错误。借助于maven，所有的jar包都放在“仓库”中，所有的项目都使用仓库的一份jar包。
+- 一个jar包依赖其他的jar包需要自己手动的加入到项目中
+FileUpload组件->IO组件，commons-fileupload-1.3.jar依赖于commons-io-2.0.1.jar
+极大的浪费了我们导入包的时间成本，也极大的增加了学习成本。借助于maven，它会自动的将依赖的jar包导入进来。
+
+二十、maven是什么【what】
+---
+- maven是一款服务于java平台的自动化构建工具
+make->Ant->Maven->Gradle
+名字叫法：我们可以叫妹文也可以叫麦文，但是没有叫妈文的。
+- 构建
+构建定义：把动态的Web工程经过编译得到的编译结果部署到服务器上的整个过程。
+- 编译：java源文件[.java]->编译->Classz字节码文件[.class]
+- 部署：最终在sevlet容器中部署的不是动态web工程，而是编译后的文件
+- 构建的各个环节
+
+清理clean：将以前编译得到的旧文件class字节码文件删除
+
+
+◾编译compile：将java源程序编译成class字节码文件
+
+
+◾测试test：自动测试，自动调用junit程序
+
+
+◾报告report：测试程序执行的结果
+
+
+◾打包package：动态Web工程打War包，java工程打jar包
+
+
+◾安装install：Maven特定的概念-----将打包得到的文件复制到“仓库”中的指定位置
+
+
+◾部署deploy：将动态Web工程生成的war包复制到Servlet容器下，使其可以运行
+
+二十一、创建约定的目录结构（maven工程必须按照约定的目录结构创建）
+---
+```cmd
+	  根目录：工程名
+	|---src：源码
+	|---|---main:存放主程序
+	|---|---|---java：java源码文件
+	|---|---|---resource：存放框架的配置文件
+	|---|---test：存放测试程序
+	|---pop.xml：maven的核心配置文件
+```
+
+二十二、生命周期　　
+---
+Maven有三套相互独立的生命周期，请注意这里说的是“三套”，而且“相互独立”，初学者容易将Maven的生命周期看成一个整体，其实不然。这三套生命周期分别是：
+- Clean Lifecycle 在进行真正的构建之前进行一些清理工作。Clean生命周期一共包含了三个阶段：
+1. pre-clean 执行一些需要在clean之前完成的工作
+2. clean 移除所有上一次构建生成的文件
+3. post-clean 执行一些需要在clean之后立刻完成的工作
+
+- Default Lifecycle 构建的核心部分，编译，测试，打包，部署等等。
+
+◾validate
+
+
+◾generate-sources
+
+
+◾process-sources
+
+
+◾generate-resources
+
+
+◾process-resources 复制并处理资源文件，至目标目录，准备打包
+
+
+◾compile 编译项目的源代码
+
+
+◾process-classes
+
+
+◾generate-test-sources
+
+
+◾process-test-sources
+
+
+◾generate-test-resources
+
+
+◾process-test-resources 复制并处理资源文件，至目标测试目录
+
+
+◾test-compile 编译测试源代码
+
+
+◾process-test-classes
+
+
+◾test 使用合适的单元测试框架运行测试。这些测试代码不会被打包或部署
+
+
+◾prepare-package
+
+
+◾package 接受编译好的代码，打包成可发布的格式，如 JAR
+
+
+◾pre-integration-test
+
+
+◾integration-test
+
+
+◾post-integration-test
+
+
+◾verify
+
+
+◾install 将包安装至本地仓库，以让其它项目依赖。
+
+
+◾deploy 将最终的包复制到远程的仓库，以让其它开发人员与项目共享
+通过日志我们发现，其实执行mvn install，其中已经执行了compile 和 test 。
+
+总结：不论你要执行生命周期的哪一个阶段，maven都是从这个生命周期的开始执行
+
+插件：每个阶段都有插件（plugin），看上面标红的。插件的职责就是执行它对应的命令。
+
+- Site Lifecycle 生成项目报告，站点，发布站点。
+
+pre-site 执行一些需要在生成站点文档之前完成的工作
+
+
+◾site 生成项目的站点文档
+
+
+◾post-site 执行一些需要在生成站点文档之后完成的工作，并且为部署做准备
+
+
+◾site-deploy 将生成的站点文档部署到特定的服务器上
+
+二十三、build配置
+---
+```cmd
+<build>
+　　<!-- 项目的名字 -->
+　　<finalName>WebMavenDemo</finalName>
+　　<!-- 描述项目中资源的位置 -->
+　　<resources>
+　　　　<!-- 自定义资源1 -->
+　　　　<resource>
+　　　　　　<!-- 资源目录 -->
+　　　　　　<directory>src/main/java</directory>
+　　　　　　<!-- 包括哪些文件参与打包 -->
+　　　　　　<includes>
+　　　　　　　　<include>**/*.xml</include>
+　　　　　　</includes>
+　　　　　　<!-- 排除哪些文件不参与打包 -->
+　　　　　　<excludes>
+　　　　　　　　<exclude>**/*.txt</exclude>
+　　　　　　　　　　<exclude>**/*.doc</exclude>
+　　　　　　</excludes>
+　　　　</resource>
+　　</resources>
+　　<!-- 设置构建时候的插件 -->
+　　<plugins>
+　　　　<plugin>
+　　　　　　<groupId>org.apache.maven.plugins</groupId>
+　　　　　　<artifactId>maven-compiler-plugin</artifactId>
+　　　　　　<version>2.1</version>
+　　　　　　<configuration>
+　　　　　　　　<!-- 源代码编译版本 -->
+　　　　　　　　<source>1.8</source>
+　　　　　　　　<!-- 目标平台编译版本 -->
+　　　　　　　　<target>1.8</target>
+　　　　　　</configuration>
+　　　　</plugin>
+　　　　<!-- 资源插件（资源的插件） -->  
+　　　　<plugin>  
+　　　　　　<groupId>org.apache.maven.plugins</groupId>  
+　　　　　　<artifactId>maven-resources-plugin</artifactId>  
+　　　　　　<version>2.1</version>  
+　　　　　　<executions>  
+　　　　　　　　<execution>  
+　　　　　　　　　　<phase>compile</phase>  
+　　　　　　　　</execution>  
+　　　　　　</executions>  
+　　　　　　<configuration>  
+　　　　　　　　<encoding>UTF-8</encoding>  
+　　　　　　</configuration> 
+　　　　</plugin>
+　　　　<!-- war插件(将项目打成war包) -->  
+　　　　<plugin>  
+　　　　　　<groupId>org.apache.maven.plugins</groupId>  
+　　　　　　<artifactId>maven-war-plugin</artifactId>  
+　　　　　　<version>2.1</version>  
+　　　　　　<configuration>
+　　　　　　　　<!-- war包名字 -->  
+　　　　　　　　<warName>WebMavenDemo1</warName>
+　　　　　　</configuration>  
+　　　　</plugin>  
+　　</plugins>
+</build>
+```
+
+
+
