@@ -216,3 +216,7 @@ Maven不仅是构建工具，还是一个***依赖管理工具和项目管理工
 这里介绍2个提供仓库服务搜索的地址： 
 - Sonatype Nexus：https://repository.sonatype.org/ 
 - MVNrepository：http://mvnrepository.com/
+
+十八、书籍推荐
+---
+<<Maven实战>>
