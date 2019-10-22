@@ -183,3 +183,36 @@ Maven不仅是构建工具，还是一个***依赖管理工具和项目管理工
  看代码，从命名上就看的出来区别，repository表示表示发布版本（稳定版本）构件的仓库，snapshotRepository表示快照版本（开发测试版本）的仓库。这两个元素都需要配置id、name和url，id为远程仓库的唯一标识，name是为了方便人阅读，关键的url表示该仓库的地址。
 
 配置好了就运行命令mvn clean deploy，Maven就会将项目构建输出的构件部署到配置对应的远程仓库，如果项目当前的版本是快照版本，则部署到快照版本的仓库地址，否则就部署到发布版本的仓库地址。 当前项目是快照还是发布版本是通过 true 这个来区分的。忘记的同学在看看上面的## 远程仓库的配置。
+
+十六、镜像
+---
+如果仓库X可以提供仓库Y存储的所有内容，那么就可以认为X是Y的一个镜像。用过Maven的都知道，国外的中央仓库用起来太慢了，所以选择一个国内的镜像就很有必要，我推荐国内的阿里云镜像。 阿里云镜像：配置很简单，修改conf文件夹下的settings.xml文件，添加如下镜像配置：
+```cmd
+<!-- 仓库镜像 -->
+	<mirrors>
+		<mirror>
+			<id>nexus</id>
+			<name>本地nuxus私服镜像</name>
+			<!-- 服务器镜像的URL地址 -->
+			<!-- <url>http://121.42.145.73:8081/nexus/content/groups/public/</url> -->
+			<!-- <url>http://maven.hexnova.com/nexus/content/groups/hexnova-open</url> -->
+			<!-- <url>https://dev-cv.saicmotor.com/nexus/content/repositories/thirdparty</url> -->
+			<url>https://dev-cv.saicmotor.com/nexus/content/groups/public</url>
+			
+			<!-- *号表示是所有的Maven仓库镜像 -->
+			<!-- 还可以有以下几种取值：【central】、【repo1,repo2】、【*,!inhouse】、【external:*】 等 -->
+			<mirrorOf>*</mirrorOf>
+		</mirror>
+	</mirrors>
+```
+上例子中，的值为central,表示该配置为中央库的镜像，任何对于中央仓库的请求都会转至该镜像，用户也可以用同样的方法配置其他仓库的镜像
+
+这里介绍下 <mirrorOf>配置的各种选项 - <mirrorOf>*<mirrorOf>:匹配所有远程仓库。 - <mirrorOf>external:*<mirrorOf>:匹配所有远程仓库，使用localhost的除外，使用file://协议的除外。也就是说，匹配所有不在本机上的远程仓库。 - <mirrorOf>repo1,repo2<mirrorOf>:匹配仓库repo1h和repo2，使用逗号分隔多个远程仓库。 - <mirrorOf>*,!repo1<mirrorOf>:匹配所有远程仓库，repo1除外，使用感叹号将仓库从匹配中排除。
+
+需要注意的是，由于镜像仓库完全屏蔽了被镜像仓库，当镜像仓库不稳定或者停止服务的时候，Maven仍将无法访问被镜像仓库，因而将无法下载构件。
+
+十七、仓库服务搜索
+---
+这里介绍2个提供仓库服务搜索的地址： 
+- Sonatype Nexus：https://repository.sonatype.org/ 
+- MVNrepository：http://mvnrepository.com/
